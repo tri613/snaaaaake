@@ -1,0 +1,4 @@
+canvas {
+  --canvas-border-color: coral;
+  border: 1px solid var(--canvas-border-color);
+}

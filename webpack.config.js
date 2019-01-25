@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackIncludeAssetsPlugin = require('html-webpack-include-assets-plugin');
 
 module.exports = {
   module: {
@@ -19,6 +20,11 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html'
+    }),
+    new HtmlWebpackIncludeAssetsPlugin({
+      assets: ['src/style.css'],
+      append: true
     })
-  ]
+  ],
+  devtool: 'source-map'
 };
