@@ -18,7 +18,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'Snakkkkkkke!'
+      template: 'src/index.html'
     })
   ]
 };
