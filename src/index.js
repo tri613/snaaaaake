@@ -1,5 +1,12 @@
-import { interval, fromEvent, race } from 'rxjs';
-import { throttle, tap, map } from 'rxjs/operators';
+import { interval, fromEvent, from } from 'rxjs';
+import {
+  throttle,
+  tap,
+  map,
+  merge,
+  combineLatest,
+  throttleTime
+} from 'rxjs/operators';
 import Snake from './snake';
 
 const UNIT = 20;
@@ -12,9 +19,10 @@ canvas.height = UNIT * 30;
 const snake = new Snake(UNIT);
 let queue = [];
 
-const drawSnake = () => {
+const drawSnake = body => {
+  console.log('draw snake', body);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  snake.body.forEach(({ x, y }) => {
+  body.forEach(({ x, y }) => {
     ctx.strokeRect(x, y, UNIT, UNIT);
   });
 };
@@ -32,19 +40,19 @@ function draw() {
 function handleKeydown(e) {
   switch (e.code) {
     case 'ArrowDown':
-      queue.push(snake.moveDown.bind(snake));
+      snake.moveDown();
       break;
 
     case 'ArrowUp':
-      queue.push(snake.moveUp.bind(snake));
+      snake.moveUp();
       break;
 
     case 'ArrowRight':
-      queue.push(snake.moveRight.bind(snake));
+      snake.moveRight();
       break;
 
     case 'ArrowLeft':
-      queue.push(snake.moveLeft.bind(snake));
+      snake.moveLeft();
       break;
 
     default:
@@ -53,16 +61,23 @@ function handleKeydown(e) {
 }
 
 const keydowns = fromEvent(document, 'keydown').pipe(
-  tap(console.log),
-  map(handleKeydown)
+  map(handleKeydown),
+  tap(next => console.log('key', snake.body))
 );
-const autoMove = interval(1000).pipe(
-  tap(console.log),
-  map(() => snake.moveForward())
-);
-// const obs = race(autoMove, keydowns);
-const obs = autoMove.pipe(throttle(() => keydowns));
-obs.subscribe();
 
-// setInterval(() => queue.push(snake.moveForward.bind(snake)), 1000);
-draw();
+// const autoMove = interval(1000).pipe(map(() => snake.moveForward()));
+
+const body = from(snake.body).pipe(
+  concat(keydowns),
+  map(() => snake.body),
+  tap(console.log)
+);
+
+// const obs = race(autoMove, keydowns);
+// const obs = autoMove.pipe(throttle(() => keydowns));
+// obs.subscribe();
+// keydowns.subscribe();
+body.subscribe(drawSnake);
+
+// setInterval(() => drawSnake(snake.body), 500);
+// draw();
