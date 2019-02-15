@@ -1,9 +1,10 @@
 class Snake {
   constructor(size = 1) {
+    const initSize = 5;
     this.size = size;
-    this.body = [...new Array(3)].map((_, i) => ({
+    this.body = [...new Array(initSize)].map((_, i) => ({
       x: 0,
-      y: this.size * (3 - i)
+      y: this.size * (initSize - i)
     }));
   }
 
@@ -55,7 +56,9 @@ class Snake {
     if (this.direction === 'down') {
       return false;
     }
-    this.move(this.head.x, this.head.y - this.size);
+
+    const newHead = [this.head.x, this.head.y - this.size];
+    this.move(...newHead);
   }
 
   moveDown() {
