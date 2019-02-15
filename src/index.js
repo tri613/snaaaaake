@@ -1,15 +1,23 @@
-import { UNIT, source } from './game';
+import { createGame } from './game';
+
+const UNIT = 20;
+const BOUNDARY = UNIT * 30;
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
-canvas.width = UNIT * 30;
-canvas.height = UNIT * 30;
+canvas.width = BOUNDARY;
+canvas.height = BOUNDARY;
 
-const drawSnake = body => {
+const drawSnake = ([head, ...body]) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#FF0000';
+  ctx.strokeRect(head.x, head.y, UNIT, UNIT);
+
+  ctx.strokeStyle = '#000';
   body.forEach(({ x, y }) => {
     ctx.strokeRect(x, y, UNIT, UNIT);
   });
 };
 
-source.subscribe(drawSnake, console.error);
+const source = createGame(UNIT, BOUNDARY);
+const cancel = source.subscribe(drawSnake, console.error);

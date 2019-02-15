@@ -88,29 +88,30 @@ class Snake {
   }
 
   grow() {
-    const { x, y } = this.tail;
+    const { x: tx, y: ty } = this.tail;
 
     let newTail;
     switch (this.direction) {
       case 'up': {
-        newTail = [x, y + this.size];
+        newTail = [tx, ty + this.size];
         break;
       }
       case 'down': {
-        newTail = [x, y - this.size];
+        newTail = [tx, ty - this.size];
         break;
       }
       case 'left': {
-        newTail = [x + this.size, y];
+        newTail = [tx + this.size, ty];
         break;
       }
       case 'right': {
-        newTail = [x - this.size, y];
+        newTail = [tx - this.size, ty];
         break;
       }
     }
 
-    this.body.push(newTail);
+    const [x, y] = newTail;
+    this.body.push({ x, y });
   }
 }
 

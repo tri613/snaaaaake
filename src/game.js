@@ -1,56 +1,52 @@
 import { interval, fromEvent, merge, of } from 'rxjs';
-import { map, bufferTime, mapTo, skipUntil, tap } from 'rxjs/operators';
+import { map, bufferTime, mapTo, skipUntil, tap, take } from 'rxjs/operators';
 import Snake from './snake';
 
-export const UNIT = 20;
-const snake = new Snake(UNIT);
+export function createGame(unit, boundary) {
+  const snake = new Snake(unit);
 
-function handleKeydown(e) {
-  switch (e.code) {
-    case 'ArrowDown':
-      return 'moveDown';
+  const init = of(snake.body);
+  const keydowns = fromEvent(document, 'keydown').pipe(
+    map(e => e.code.replace('Arrow', 'move'))
+  );
+  const autoMove = interval(1000).pipe(mapTo('moveForward'));
+  const grow = interval(300).pipe(mapTo('grow'));
 
-    case 'ArrowUp':
-      return 'moveUp';
+  const listeners = merge(keydowns, autoMove, grow).pipe(
+    skipUntil(keydowns),
+    bufferTime((60 / 1000) * 3),
+    map(actions => {
+      const fromKeyboardMovements = actions.filter(
+        action => action !== 'moveForward'
+      );
+      if (fromKeyboardMovements.length) {
+        return fromKeyboardMovements;
+      }
+      return actions;
+    }),
+    map(actions => {
+      actions.forEach(action => snake[action]());
+      return snake.body;
+    }),
+    map(body => {
+      const [head, ...rest] = body;
 
-    case 'ArrowRight':
-      return 'moveRight';
+      if (
+        head.x < 0 ||
+        head.x >= boundary ||
+        head.y < 0 ||
+        head.y >= boundary
+      ) {
+        throw '撞到自己辣！';
+      }
 
-    case 'ArrowLeft':
-      return 'moveLeft';
+      if (rest.some(({ x, y }) => head.x === x && head.y === y)) {
+        throw '撞到自己辣！';
+      }
 
-    default:
-      break;
-  }
+      return body;
+    })
+  );
+
+  return merge(init, listeners);
 }
-
-const init = of(snake.body);
-const keydowns = fromEvent(document, 'keydown').pipe(map(handleKeydown));
-const autoMove = interval(1000).pipe(mapTo('moveForward'));
-
-const listeners = merge(autoMove, keydowns).pipe(
-  skipUntil(keydowns),
-  bufferTime((60 / 1000) * 3),
-  map(actions => {
-    const fromKeyboardMovements = actions.filter(
-      action => action !== 'moveForward'
-    );
-    if (fromKeyboardMovements.length) {
-      return fromKeyboardMovements;
-    }
-    return actions;
-  }),
-  map(actions => {
-    actions.forEach(action => snake[action]());
-    return snake.body;
-  }),
-  map(body => {
-    const [head, ...rest] = body;
-    if (rest.some(({ x, y }) => head.x === x && head.y === y)) {
-      throw Error('撞到自己辣！');
-    }
-    return body;
-  })
-);
-
-export const source = merge(init, listeners);
