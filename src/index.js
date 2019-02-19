@@ -8,7 +8,10 @@ const ctx = canvas.getContext('2d');
 canvas.width = BOUNDARY;
 canvas.height = BOUNDARY;
 
+const drawMap = () => {};
+
 const drawSnake = ([head, ...body]) => {
+  console.log('drawSnake');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = '#FF0000';
   ctx.strokeRect(head.x, head.y, UNIT, UNIT);

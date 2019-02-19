@@ -1,81 +1,67 @@
 import { interval, fromEvent, merge, of } from 'rxjs';
-import { map, bufferTime, mapTo, skipUntil, tap, take } from 'rxjs/operators';
-import Snake from './snake';
+import { map, mapTo, skipUntil, tap, filter, take } from 'rxjs/operators';
+import Snake, { DIRECTIONS } from './snake';
 
-function hitBoundary(x, y, boundary) {
+function hasHitBoundary(x, y, boundary) {
   return x < 0 || x >= boundary || y < 0 || y >= boundary;
 }
 
-function grow(tail, butt, unit) {
-  const { x: tx, y: ty } = tail;
-  const { x: bx, y: by } = butt;
+function hasHitSelf(head, body) {
+  return body.some(({ x: tx, y: ty }) => head.x === tx && head.y === ty);
+}
 
-  if (tx < bx) {
-    return { x: tx - unit, y: ty };
+function checkIsGameOver(snakeBody, boundary) {
+  const [head, ...rest] = snakeBody;
+  if (hasHitBoundary(head.x, head.y, boundary)) {
+    throw '撞到牆辣！';
   }
 
-  if (tx > bx) {
-    return { x: tx + unit, y: ty };
-  }
-
-  if (by > ty) {
-    return { x: tx, y: ty - unit };
-  }
-
-  if (by < ty) {
-    return { x: tx, y: ty + unit };
+  if (hasHitSelf(head, rest)) {
+    throw '撞到自己辣！';
   }
 }
 
 export function createGame(UNIT, BOUNDARY) {
-  const snake = new Snake(UNIT);
+  const snake = new Snake(UNIT, BOUNDARY);
+  const init = of(snake.body).pipe(
+    tap(console.log),
+    mapTo(true)
+  );
 
-  const init = of(snake.body);
   const keydowns = fromEvent(document, 'keydown').pipe(
-    map(e => e.code.replace('Arrow', 'move'))
-  );
-  const autoMove = interval(1000).pipe(mapTo('moveForward'));
-
-  const grow = interval(300).pipe(
-    map(() => {
-      let newTail;
-      newTail = grow(snake.tail, snake.body[snake.body.length - 2], UNIT);
-
-      if (x > BOUNDARY) {
+    filter(e => e.code.includes('Arrow')),
+    map(e => {
+      switch (e.code) {
+        case 'ArrowUp': {
+          snake.setDirection(DIRECTIONS.up);
+          break;
+        }
+        case 'ArrowDown': {
+          snake.setDirection(DIRECTIONS.down);
+          break;
+        }
+        case 'ArrowLeft': {
+          snake.setDirection(DIRECTIONS.left);
+          break;
+        }
+        case 'ArrowRight': {
+          snake.setDirection(DIRECTIONS.right);
+          break;
+        }
       }
-    })
+    }),
+    mapTo(false)
   );
 
-  const listeners = merge(keydowns, autoMove, grow).pipe(
+  const autoMove = interval(100).pipe(
     skipUntil(keydowns),
-    bufferTime((60 / 1000) * 3),
-    map(actions => {
-      const fromKeyboardMovements = actions.filter(
-        action => action !== 'moveForward'
-      );
-      if (fromKeyboardMovements.length) {
-        return fromKeyboardMovements;
-      }
-      return actions;
-    }),
-    map(actions => {
-      actions.forEach(action => snake[action]());
-      return snake.body;
-    }),
-    map(body => {
-      const [head, ...rest] = body;
-
-      if (hitBoundary(head.x, head.y, BOUNDARY)) {
-        throw '撞到牆辣！';
-      }
-
-      if (rest.some(({ x, y }) => head.x === x && head.y === y)) {
-        throw '撞到自己辣！';
-      }
-
-      return body;
-    })
+    map(() => snake.moveForward()),
+    mapTo(true)
   );
 
-  return merge(init, listeners);
+  return merge(init, keydowns, autoMove).pipe(
+    filter(shouldDrawSnake => shouldDrawSnake),
+    map(() => checkIsGameOver(snake.body, BOUNDARY)),
+    mapTo(snake.body)
+  );
 }
