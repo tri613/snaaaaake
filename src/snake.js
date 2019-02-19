@@ -11,18 +11,11 @@ class Snake {
 
     this.unit = unit;
     this.boundary = boundary;
-    this.direction = DIRECTIONS.down;
-
-    const start = Math.floor((boundary - unit) / 2);
-
-    // this.body = [...new Array(initSize)].map((_, i) => ({
-    //   x: this.unit * center,
-    //   y: Math.floor(boundary / 2)
-    // }));
+    this.direction = DIRECTIONS.right;
 
     this.body = [...new Array(initSize)].map((_, i) => ({
-      x: 0,
-      y: this.unit * (initSize - i)
+      x: unit * 2 + unit * (initSize - i),
+      y: Math.floor(boundary / 2)
     }));
   }
 

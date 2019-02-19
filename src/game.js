@@ -1,5 +1,5 @@
-import { interval, fromEvent, merge, of } from 'rxjs';
-import { map, mapTo, skipUntil, tap, filter, take } from 'rxjs/operators';
+import { interval, fromEvent, merge, of, throwError } from 'rxjs';
+import { map, mapTo, skipUntil, tap, filter, mergeMap } from 'rxjs/operators';
 import Snake, { DIRECTIONS } from './snake';
 
 function hasHitBoundary(x, y, boundary) {
@@ -13,16 +13,17 @@ function hasHitSelf(head, body) {
 function checkIsGameOver(snakeBody, boundary) {
   const [head, ...rest] = snakeBody;
   if (hasHitBoundary(head.x, head.y, boundary)) {
-    throw '撞到牆辣！';
+    return '撞到牆辣！';
   }
 
   if (hasHitSelf(head, rest)) {
-    throw '撞到自己辣！';
+    return '撞到自己辣！';
   }
 }
 
 export function createGame(UNIT, BOUNDARY) {
   const snake = new Snake(UNIT, BOUNDARY);
+
   const init = of(snake.body).pipe(
     tap(console.log),
     mapTo(true)
@@ -55,13 +56,15 @@ export function createGame(UNIT, BOUNDARY) {
 
   const autoMove = interval(100).pipe(
     skipUntil(keydowns),
-    map(() => snake.moveForward()),
+    map(snake.moveForward.bind(snake)),
     mapTo(true)
   );
 
   return merge(init, keydowns, autoMove).pipe(
     filter(shouldDrawSnake => shouldDrawSnake),
-    map(() => checkIsGameOver(snake.body, BOUNDARY)),
-    mapTo(snake.body)
+    mergeMap(() => {
+      const error = checkIsGameOver(snake.body, BOUNDARY);
+      return error ? throwError(error) : of(snake.body);
+    })
   );
 }
