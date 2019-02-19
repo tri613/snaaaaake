@@ -40,10 +40,9 @@ const draw = {
   }
 };
 
-let endGame;
 function startGame() {
   const source = createGame(UNIT, BOUNDARY);
-  endGame = source.subscribe(
+  source.subscribe(
     snakeBody => draw.redraw(snakeBody),
     error => {
       console.log('game over', error);
