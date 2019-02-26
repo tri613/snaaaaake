@@ -1,6 +1,7 @@
 import { interval, fromEvent, merge, of, throwError } from 'rxjs';
 import { map, mapTo, skipUntil, tap, filter, mergeMap } from 'rxjs/operators';
 import Snake, { DIRECTIONS } from './snake';
+import Fruit from './fruit';
 
 function hasHitBoundary(x, y, boundary) {
   return x < 0 || x >= boundary || y < 0 || y >= boundary;
@@ -23,11 +24,9 @@ function checkIsGameOver(snakeBody, boundary) {
 
 export function createGame(UNIT, BOUNDARY) {
   const snake = new Snake(UNIT, BOUNDARY);
+  const fruit = new Fruit(UNIT, BOUNDARY);
 
-  const init = of(snake.body).pipe(
-    tap(console.log),
-    mapTo(true)
-  );
+  const init = of(snake.body).pipe(mapTo(true));
 
   const keydowns = fromEvent(document, 'keydown').pipe(
     filter(e => e.code.includes('Arrow')),
@@ -63,8 +62,19 @@ export function createGame(UNIT, BOUNDARY) {
   return merge(init, keydowns, autoMove).pipe(
     filter(shouldDrawSnake => shouldDrawSnake),
     mergeMap(() => {
+      // check if eat fruit
+      if (snake.head.x === fruit.x && snake.head.y === fruit.y) {
+        snake.grow();
+        fruit.create();
+      }
+
       const error = checkIsGameOver(snake.body, BOUNDARY);
-      return error ? throwError(error) : of(snake.body);
+      return error
+        ? throwError(error)
+        : of({
+            snake: snake.body,
+            fruit: fruit.pos
+          });
     })
   );
 }
