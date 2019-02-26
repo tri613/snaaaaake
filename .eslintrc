@@ -1,8 +1,14 @@
 {
-  "plugins": ["prettier"],
-  "extends": ["prettier"],
+  "plugins": [
+    "prettier"
+  ],
+  "extends": [
+    "prettier",
+    "plugin:vue/essential"
+  ],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "off",
+    "vue/html-self-closing": 0
   },
   "parserOptions": {
     "ecmaVersion": 2017,
