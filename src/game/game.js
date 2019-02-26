@@ -22,9 +22,12 @@ function checkIsGameOver(snakeBody, boundary) {
   }
 }
 
+const POINT = 10;
+
 export function createGame(UNIT, BOUNDARY) {
   const snake = new Snake(UNIT, BOUNDARY);
   const fruit = new Fruit(UNIT, BOUNDARY);
+  let score = 0;
 
   const init = of(snake.body).pipe(mapTo(true));
 
@@ -66,6 +69,7 @@ export function createGame(UNIT, BOUNDARY) {
       if (snake.head.x === fruit.x && snake.head.y === fruit.y) {
         snake.grow();
         fruit.create();
+        score += POINT;
       }
 
       const error = checkIsGameOver(snake.body, BOUNDARY);
@@ -73,7 +77,8 @@ export function createGame(UNIT, BOUNDARY) {
         ? throwError(error)
         : of({
             snake: snake.body,
-            fruit: fruit.pos
+            fruit: fruit.pos,
+            score
           });
     })
   );

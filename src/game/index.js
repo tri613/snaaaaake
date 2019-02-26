@@ -1,5 +1,7 @@
 import { createGame } from './game';
 import { createDrawMap, createDrawGame } from './draw';
+import { distinctUntilChanged, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 const UNIT = 20;
 const BOUNDARY = UNIT * 30;
@@ -20,17 +22,24 @@ export function prepareGame(gameCanvas, mapCanvas) {
 
   let initialed = false;
 
-  function startGame(errorHandler) {
+  function startGame(subscriber, errorHandler) {
     if (!initialed) {
       drawMap();
       initialed = true;
     }
 
+    const subject = new Subject();
     const source = createGame(UNIT, BOUNDARY);
-    source.subscribe(
-      ({ snake, fruit }) => drawGame.draw(snake, fruit),
-      errorHandler
-    );
+    source.subscribe(subject);
+
+    subject.pipe(tap(console.log));
+
+    // subject.subscribe(source);
+    // subject.
+    // source.subscribe(({ snake, fruit, score }) => {
+    //   drawGame.draw(snake, fruit);
+    //   subscriber(score);
+    // }, errorHandler);
   }
 
   return startGame;

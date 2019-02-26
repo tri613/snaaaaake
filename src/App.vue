@@ -2,6 +2,8 @@
   <div id="app" @click="handleClick">
     <canvas id="map" ref="mapCanvas" />
     <canvas id="game" ref="gameCanvas" />
+    <div v-if="gameoverMsg">{{ gameoverMsg }}</div>
+    <div>{{ score }}</div>
   </div>
 </template>
 
@@ -13,7 +15,9 @@ export default {
   name: 'App',
   data() {
     return {
-      isPlaying: false
+      isPlaying: false,
+      score: 0,
+      gameoverMsg: ''
     };
   },
   mounted() {
@@ -29,10 +33,16 @@ export default {
     },
     startGame() {
       this.isPlaying = true;
-      controller(this.endGame);
+      this.gameoverMsg = '';
+      controller(this.subscriber, this.endGame);
+    },
+    subscriber(score) {
+      console.log({ score });
+      this.score = score;
     },
     endGame(error) {
       this.isPlaying = false;
+      this.gameoverMsg = error;
       console.error(error);
     }
   }
