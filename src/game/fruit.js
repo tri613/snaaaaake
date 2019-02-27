@@ -1,8 +1,7 @@
 class Fruit {
-  constructor(UNIT, BOUNDARY) {
-    this.unit = UNIT;
-    this.boundary = BOUNDARY;
-    this.create();
+  constructor(unit, boundary) {
+    this.unit = unit;
+    this.boundary = boundary;
   }
 
   random() {
@@ -10,9 +9,22 @@ class Fruit {
     return Math.floor(Math.random() * steps) * this.unit;
   }
 
-  create() {
+  genNextPos() {
     this.x = this.random();
     this.y = this.random();
+  }
+
+  create(snake) {
+    let count = 3;
+    this.genNextPos();
+
+    while (
+      snake.some(body => body.x === this.x && body.y === this.y) &&
+      count > 0
+    ) {
+      this.genNextPos();
+      count--;
+    }
   }
 
   get pos() {

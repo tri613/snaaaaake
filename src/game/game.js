@@ -27,6 +27,7 @@ const POINT = 10;
 export function createGame(UNIT, BOUNDARY) {
   const snake = new Snake(UNIT, BOUNDARY);
   const fruit = new Fruit(UNIT, BOUNDARY);
+  fruit.create(snake.body);
   let score = 0;
 
   const init = of(snake.body).pipe(mapTo(true));
@@ -68,7 +69,7 @@ export function createGame(UNIT, BOUNDARY) {
       // if snake eats fruit
       if (snake.head.x === fruit.x && snake.head.y === fruit.y) {
         snake.grow();
-        fruit.create();
+        fruit.create(snake.body);
         score += POINT;
       }
 
