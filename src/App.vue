@@ -1,7 +1,7 @@
 <template>
   <div id="app" @click="handleClick">
-    <canvas id="map" ref="mapCanvas" />
-    <canvas id="game" ref="gameCanvas" />
+    <canvas id="map" ref="mapCanvas"/>
+    <canvas id="game" ref="gameCanvas"/>
     <div v-if="gameoverMsg">{{ gameoverMsg }}</div>
     <div>{{ score }}</div>
   </div>
@@ -34,11 +34,8 @@ export default {
     startGame() {
       this.isPlaying = true;
       this.gameoverMsg = '';
-      controller(this.subscriber, this.endGame);
-    },
-    subscriber(score) {
-      console.log({ score });
-      this.score = score;
+      const { score: scoreObs } = controller(this.endGame);
+      scoreObs.subscribe(score => (this.score = score));
     },
     endGame(error) {
       this.isPlaying = false;
@@ -57,6 +54,10 @@ canvas {
 
 #app {
   position: relative;
+}
+
+#map {
+  background-color: #37383f;
 }
 
 #game {

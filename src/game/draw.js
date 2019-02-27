@@ -2,7 +2,7 @@ export const createDrawMap = (ctx, BOUNDARY, UNIT) => () => {
   ctx.beginPath();
   for (let x = 0; x <= BOUNDARY; x += UNIT) {
     for (let y = 0; y <= BOUNDARY; y += UNIT) {
-      ctx.strokeStyle = '#e8e8e8';
+      ctx.strokeStyle = '#494b54';
       ctx.rect(x, y, UNIT, UNIT);
     }
   }
@@ -17,21 +17,22 @@ export const createDrawGame = (ctx, BOUNDARY, UNIT) => {
       this.drawFruit(fruit);
     },
     drawSnake([head, ...body]) {
-      ctx.beginPath();
-      ctx.strokeStyle = 'red';
-      ctx.rect(head.x, head.y, UNIT, UNIT);
-      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#fff';
 
-      ctx.beginPath();
-      ctx.strokeStyle = 'blue';
+      ctx.fillStyle = '#ff1ca0';
+      ctx.fillRect(head.x, head.y, UNIT, UNIT);
+      ctx.strokeRect(head.x, head.y, UNIT, UNIT);
+
+      ctx.fillStyle = '#47ffac';
       body.forEach(({ x, y }) => {
-        ctx.rect(x, y, UNIT, UNIT);
+        ctx.fillRect(x, y, UNIT, UNIT);
+        ctx.strokeRect(x, y, UNIT, UNIT);
       });
-      ctx.stroke();
     },
     drawFruit(fruit) {
-      ctx.strokeStyle = 'yellow';
-      ctx.strokeRect(fruit.x, fruit.y, UNIT, UNIT);
+      ctx.fillStyle = '#ff5119';
+      ctx.fillRect(fruit.x, fruit.y, UNIT, UNIT);
     },
     clear() {
       ctx.clearRect(0, 0, BOUNDARY, BOUNDARY);
