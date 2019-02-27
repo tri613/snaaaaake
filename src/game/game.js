@@ -65,7 +65,7 @@ export function createGame(UNIT, BOUNDARY) {
   return merge(init, keydowns, autoMove).pipe(
     filter(shouldDrawSnake => shouldDrawSnake),
     mergeMap(() => {
-      // check if eat fruit
+      // if snake eats fruit
       if (snake.head.x === fruit.x && snake.head.y === fruit.y) {
         snake.grow();
         fruit.create();
